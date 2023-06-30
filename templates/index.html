@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Limpa SP</title>
+  <link rel="stylesheet" type="text/css" href="static/style.css">
+</head>
+<body>
+  <h1>Controle pesagem lixeiras</h1>
+  <div class="container">
+  <table>
+    <thead>
+      <tr>
+        <th>Lixeira 1</th>
+        <th>Lixeira 2</th>
+        <th>Lixeira 3</th>
+      </tr>
+    </thead>
+      <tr>
+        <td id="valor1">último valor medido inserir aqui</td>
+        <td id="valor2" >último valor medido inserir aqui</td>
+        <td id="valor3">último valor medido inserir aqui</td>
+      </tr>
+  </table>
+
+  <div class="input-container">
+    <h3>Endereços com lixo na rua:</h3>
+    <form onsubmit="addItem(event)">
+      <input type="text" id="submissionInput" placeholder="Coloque um endereço">
+      <input type="submit" value="Submit">
+    </form>
+    <select id="listBox">
+      {% for lugar in data %}
+        <option>{{ lugar[0] }}</option>
+      {% endfor %}
+    </select> 
+  </div>
+  
+</div>
+<br>
+<div class="valor_csv">
+  <div class="tempo_med">
+  <h2>Tempo médio para encher a lixeira:</h2>
+  <p>Lixeira 1: <span id="lixeira1"></span></p>
+  <p>Lixeira 2: <span id="lixeira2"></span></p>
+  <p>Lixeira 3: <span id="lixeira3"></span></p>
+  <div class="date-filter">
+    <h3>Plotar o gráfico de economia</h3>
+    <label for="filter3">Data Inicial:</label>
+    <input name="filter3" type="text" id="filter3" placeholder="Data Inicial">
+    <label for="filter4">Data Final:</label>
+    <input name="filter4" type="text" id="filter4" placeholder="Data Final">
+    <button onclick="filterData()">Filtrar</button>
+    <div id="graph">
+      <img id="plotImage" src="" style="display: none;" />
+    </div>    
+  </div>
+</div>
+  <div>
+  <div class="csv_down">
+  <h3>Extração de dados histórico lixeira (Dados disponíveis depois de 28/maio)</h3>
+  <label for="filtro1">Data Inicial:</label>
+  <input name="filtro1" type="text" id="filter1" placeholder="Data Inicial">
+  <label for="filtro2">Data Final:</label>
+  <input name="filtro2" type="text" id="filter2" placeholder="Data Final">
+  <button onclick="downloadCSV()">Download CSV</button>
+  <h3>Legenda as colunas</h3>
+    <div class="legenda">
+      
+      <p><b>Valor:</b> é o valor em gramas medido naquel intervalo de tempos<span id="lixeira1"></span></p>
+      <p><b>Chão:</b> é o valor de lixo acumulado no chão por a lixeira estar cheia<span id="lixeira1"></span></p>
+      <div class="legenda">
+      <p><b>Otimizada:</b> refere-se ao quanto a lixeira no metodo otimizado de coleta terá acumulado de lixo<span id="lixeira1"></span></p>
+      <p><b>Lixeira Real:</b> refere-se ao quanto a lixeira no metodo tradicional de coleta terá acumulado de lixo<span id="lixeira1"></span></p>
+      </div>
+      </div>
+  </div>
+  </div>
+</div>
+</body>
+</html>
+
+<script>
+    function updateData() {
+      
+      
+      var value2 = Math.random() * 10;
+      var value1 = Math.random() * 10;
+      var value3 = Math.random() * 10;
+      document.getElementById("valor1").innerText = value1.toFixed(2);
+      document.getElementById("valor2").innerText = value2.toFixed(2);
+      document.getElementById("valor3").innerText = value3.toFixed(2);
+    }
+    
+    setInterval(updateData, 15000);
+  </script>
+
+
+
+<script>
+  function addItem(event) {
+  event.preventDefault();
+  var input = document.getElementById('submissionInput');
+  var value = input.value;
+
+  
+  fetch('/add_lugar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ lugar: value })
+  })
+    .then(response => response.json())
+    .then(data => {
+      
+      input.value = '';
+
+      
+      var listBox = document.getElementById('listBox');
+      listBox.innerHTML = '';
+      data.forEach(lugar => {
+        var option = document.createElement('option');
+        option.text = lugar;
+        listBox.add(option);
+      });
+    });
+}
+</script>
+<script>
+  
+  function downloadCSV() {
+    
+    var filter1 = document.getElementById('filter1').value;
+    var filter2 = document.getElementById('filter2').value;
+
+    
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/download_csv';
+
+    
+    var input1 = document.createElement('input');
+    input1.type = 'hidden';
+    input1.name = 'filter1';
+    input1.value = filter1;
+    form.appendChild(input1);
+
+    var input2 = document.createElement('input');
+    input2.type = 'hidden';
+    input2.name = 'filter2';
+    input2.value = filter2;
+    form.appendChild(input2);
+
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>
+
+
+<script>
+  function updateNumbers() {
+    fetch('/generate_numbers')  
+      .then(response => response.json())  
+      .then(data => {
+        
+        document.getElementById('lixeira1').innerText = data.number1;
+        document.getElementById('lixeira2').innerText = data.number2;
+        document.getElementById('lixeira3').innerText = data.number3;
+      })
+      .catch(error => console.log(error));
+  }
+
+
+  updateNumbers();
+  setInterval(updateNumbers, 60000);
+</script>
+
+<script>
+  
+  function filterData() {
+    var filter3 = document.getElementById('filter3').value;
+    var filter4 = document.getElementById('filter4').value;
+
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/generate_plot';
+
+    var input1 = document.createElement('input');
+    input1.type = 'hidden';
+    input1.name = 'filter3';
+    input1.value = filter3;
+    form.appendChild(input1);
+
+    var input2 = document.createElement('input');
+    input2.type = 'hidden';
+    input2.name = 'filter4';
+    input2.value = filter4;
+    form.appendChild(input2);
+
+    var plotImage = document.getElementById('plotImage');
+    plotImage.src = '';
+    plotImage.style.display = 'none';
+    form.target = 'plotImage';
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();  
+
+      
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/generate_plot', true);
+      xhr.responseType = 'blob';  
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var blob = xhr.response;
+          var url = URL.createObjectURL(blob);  
+          plotImage.src = url;
+          plotImage.style.display = 'block';  
+        }
+      };
+      xhr.send(new FormData(form));
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>
+
+
+
+
+

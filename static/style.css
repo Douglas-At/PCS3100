@@ -1,0 +1,65 @@
+table {
+    width: 50%;
+    margin-right: 100px;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    
+}
+.container {
+    display: flex;
+    
+  }
+
+  .valor_csv {
+    display: flex;
+    
+  }
+
+th, td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    font-family: 'Calibri';
+}
+
+th {
+    background-color: rgb(34, 97, 23);
+    color: #f5f5f5;
+    font-family: 'Calibri';
+}
+
+h1,h2,h3,p{
+    font-family: 'Calibri';
+}
+
+label {
+    
+    font-weight: bold;
+    font-family: 'Calibri';
+    margin-left: 15px;
+    
+  }
+
+  .input-container {
+    display: flex;
+    align-items: right;
+    margin-bottom: 10px;
+    flex-direction: column;
+    font-family: 'Calibri';
+}
+
+.tempo_med{
+    display: flex;
+    align-items: right;
+    margin-bottom: 10px;
+    margin-right: 300px;
+    flex-direction: column;
+    font-family: 'Calibri';
+}
+
+
+
+
+.csv_down{
+    margin-top: 50px;
+}
